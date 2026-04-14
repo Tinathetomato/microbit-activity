@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>마이크로비트 순서도 실습</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --purple: #6C5CE7;
+  --purple-light: #A29BFE;
+  --purple-pale: #F0EEFF;
+  --teal: #00B894;
+  --teal-light: #55EFC4;
+  --teal-pale: #E8FBF5;
+  --amber: #FDCB6E;
+  --amber-dark: #E17055;
+  --amber-pale: #FFF9EC;
+  --gray-900: #1a1a2e;
+  --gray-700: #2d2d44;
+  --gray-500: #6c6c8a;
+  --gray-300: #c4c4d4;
+  --gray-100: #f4f4f8;
+  --white: #ffffff;
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--gray-100);
+  color: var(--gray-900);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* ── 헤더 ── */
+.app-header {
+  background: var(--gray-900);
+  color: var(--white);
+  padding: 20px 20px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--purple-light);
+  letter-spacing: .12em;
+  margin-bottom: 4px;
+}
+.header-title {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.progress-bar-wrap {
+  margin-top: 12px;
+  display: flex;
+  gap: 4px;
+}
+.progress-seg {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,.18);
+  transition: background .4s;
+}
+.progress-seg.done { background: var(--teal); }
+.progress-seg.active { background: var(--purple-light); }
+
+/* ── 섹션 카드 ── */
+.section-card {
+  margin: 14px 14px 0;
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  transition: border-color .3s, box-shadow .3s;
+}
+.section-card.active-section {
+  border-color: var(--purple-light);
+  box-shadow: 0 4px 24px rgba(108,92,231,.12);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+.section-num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--purple-pale);
+  color: var(--purple);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.section-num.done-num {
+  background: var(--teal-pale);
+  color: var(--teal);
+}
+.section-title-text {
+  font-size: 15px;
+  font-weight: 700;
+  flex: 1;
+}
+.section-chevron {
+  color: var(--gray-300);
+  font-size: 18px;
+  transition: transform .3s;
+  line-height: 1;
+}
+.section-chevron.open { transform: rotate(180deg); }
+
+.section-body {
+  display: none;
+  padding: 0 16px 20px;
+  border-top: 1px solid var(--gray-100);
+}
+.section-body.open { display: block; }
+
+/* ── 이름 입력 ── */
+.info-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.info-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gray-500);
+  letter-spacing: .04em;
+}
+.field-input {
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 15px;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--gray-900);
+  background: var(--white);
+  outline: none;
+  transition: border-color .2s;
+  width: 100%;
+}
+.field-input:focus { border-color: var(--purple); }
+
+/* ── 기호 카드 ── */
+.symbol-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.sym-card {
+  border: 1.5px solid var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gray-100);
+}
+.sym-svg { flex-shrink: 0; }
+.sym-info {}
+.sym-name { font-size: 12px; font-weight: 700; color: var(--gray-900); }
+.sym-desc { font-size: 11px; color: var(--gray-500); margin-top: 2px; line-height: 1.45; }
+
+/* ── 팁 박스 ── */
+.tip-box {
+  margin-top: 12px;
+  background: var(--teal-pale);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #007a5e;
+  line-height: 1.6;
+  border-left: 3px solid var(--teal);
+}
+
+/* ── 미션 카드 ── */
+.mission-card {
+  margin-top: 14px;
+  border: 1.5px solid var(--gray-100);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.mission-header {
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mh-a { background: var(--purple-pale); color: var(--purple); }
+.mh-b { background: var(--amber-pale); color: var(--amber-dark); }
+.mission-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: var(--purple);
+  color: var(--white);
+}
+.mission-badge-b { background: var(--amber-dark); }
+.mission-scenario {
+  padding: 10px 14px 12px;
+  font-size: 13px;
+  color: var(--gray-700);
+  line-height: 1.65;
+  background: var(--white);
+}
+.mission-hint {
+  padding: 8px 14px;
+  font-size: 11px;
+  color: var(--gray-500);
+  background: var(--gray-100);
+  line-height: 1.5;
+}
+
+/* ── 캔버스 드로잉 ── */
+.canvas-wrap {
+  margin-top: 12px;
+  border: 1.5px dashed var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  position: relative;
+}
+.canvas-toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--gray-100);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.tool-btn {
+  border: 1.5px solid var(--gray-300);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--white);
+  cursor: pointer;
+  color: var(--gray-700);
+  transition: all .15s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.tool-btn:active { background: var(--gray-100); transform: scale(.97); }
+.tool-btn.selected { background: var(--purple); color: var(--white); border-color: var(--purple); }
+.color-dot {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform .15s;
+  flex-shrink: 0;
+}
+.color-dot:active { transform: scale(.9); }
+.color-dot.selected { border-color: var(--gray-900); }
+.sep { width: 1px; height: 20px; background: var(--gray-300); margin: 0 2px; }
+.tool-spacer { flex: 1; }
+.clear-btn {
+  font-size: 11px;
+  color: var(--amber-dark);
+  background: none;
+  border: 1.5px solid var(--amber-dark);
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+canvas {
+  display: block;
+  width: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+.canvas-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  color: var(--gray-300);
+  text-align: center;
+  pointer-events: none;
+  line-height: 1.7;
+  transition: opacity .3s;
+}
+
+/* ── 체크리스트 ── */
+.checklist {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background .15s;
+  user-select: none;
+}
+.check-item.checked { background: var(--teal-pale); }
+.check-box-custom {
+  width: 20px; height: 20px;
+  border: 2px solid var(--gray-300);
+  border-radius: 5px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+  margin-top: 1px;
+}
+.check-item.checked .check-box-custom {
+  background: var(--teal);
+  border-color: var(--teal);
+}
+.check-mark { display: none; color: white; font-size: 12px; font-weight: 700; }
+.check-item.checked .check-mark { display: block; }
+.check-text { font-size: 13px; color: var(--gray-700); line-height: 1.5; }
+.check-item.checked .check-text { color: #007a5e; }
+
+/* ── 소감 ── */
+.reflect-textarea {
+  width: 100%;
+  margin-top: 12px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--gray-900);
+  resize: none;
+  outline: none;
+  min-height: 100px;
+  line-height: 1.7;
+  transition: border-color .2s;
+}
+.reflect-textarea:focus { border-color: var(--purple); }
+
+/* ── 난이도 별점 ── */
+.star-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+}
+.star-label-text {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-right: 4px;
+}
+.star-btn {
+  font-size: 26px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  transition: transform .15s;
+  color: var(--gray-300);
+}
+.star-btn:active { transform: scale(1.2); }
+.star-btn.lit { color: var(--amber); }
+.star-level {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-left: 4px;
+  min-width: 60px;
+}
+
+/* ── 완료 버튼 ── */
+.done-btn {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  background: var(--purple);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .02em;
+}
+.done-btn:active { background: #5a4bc9; transform: scale(.98); }
+
+/* ── 완료 화면 ── */
+.complete-screen {
+  display: none;
+  margin: 14px;
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 40px 24px;
+  text-align: center;
+  border: 2px solid var(--teal-light);
+}
+.complete-screen.show { display: block; }
+.complete-icon { font-size: 52px; margin-bottom: 16px; }
+.complete-title { font-size: 20px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+.complete-sub { font-size: 14px; color: var(--gray-500); line-height: 1.7; }
+.complete-name { color: var(--purple); font-weight: 700; }
+.restart-btn {
+  margin-top: 24px;
+  padding: 12px 28px;
+  background: var(--gray-100);
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 500;
+  color: var(--gray-700);
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="header-label">PHYSICAL COMPUTING · MICROBIT</div>
+  <div class="header-title">순서도로 먼저 생각하기</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-seg active" id="prog0"></div>
+    <div class="progress-seg" id="prog1"></div>
+    <div class="progress-seg" id="prog2"></div>
+    <div class="progress-seg" id="prog3"></div>
+    <div class="progress-seg" id="prog4"></div>
+  </div>
+</div>
+
+<!-- 섹션 0: 내 정보 -->
+<div class="section-card active-section" id="sec0">
+  <div class="section-header" onclick="toggleSection(0)">
+    <div class="section-num" id="num0">01</div>
+    <div class="section-title-text">내 정보 입력</div>
+    <div class="section-chevron open" id="chev0">▾</div>
+  </div>
+  <div class="section-body open" id="body0">
+    <div class="info-row">
+      <div class="info-field">
+        <div class="field-label">이름</div>
+        <input class="field-input" id="inp-name" placeholder="홍길동" oninput="updateProgress()">
+      </div>
+      <div class="info-field">
+        <div class="field-label">학번</div>
+        <input class="field-input" id="inp-id" placeholder="20241234" oninput="updateProgress()">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 섹션 1: 기호 익히기 -->
+<div class="section-card" id="sec1">
+  <div class="section-header" onclick="toggleSection(1)">
+    <div class="section-num" id="num1">02</div>
+    <div class="section-title-text">순서도 기호 익히기</div>
+    <div class="section-chevron" id="chev1">▾</div>
+  </div>
+  <div class="section-body" id="body1">
+    <div class="symbol-grid">
+      <div class="sym-card">
+        <svg class="sym-svg" width="46" height="28" viewBox="0 0 46 28">
+          <ellipse cx="23" cy="14" rx="21" ry="12" fill="#F0EEFF" stroke="#6C5CE7" stroke-width="1.5"/>
+          <text x="23" y="18" text-anchor="middle" font-size="9" fill="#6C5CE7" font-family="sans-serif" font-weight="700">시작/끝</text>
+        </svg>
+        <div class="sym-info">
+          <div class="sym-name">타원</div>
+          <div class="sym-desc">프로그램 시작하면, 끝내기</div>
+        </div>
+      </div>
+      <div class="sym-card">
+        <svg class="sym-svg" width="46" height="32" viewBox="0 0 46 32">
+          <rect x="3" y="3" width="40" height="26" rx="4" fill="#E8FBF5" stroke="#00B894" stroke-width="1.5"/>
+          <text x="23" y="20" text-anchor="middle" font-size="9" fill="#007a5e" font-family="sans-serif" font-weight="700">처리</text>
+        </svg>
+        <div class="sym-info">
+          <div class="sym-name">직사각형</div>
+          <div class="sym-desc">동작, 출력, 실행</div>
+        </div>
+      </div>
+      <div class="sym-card">
+        <svg class="sym-svg" width="46" height="32" viewBox="0 0 46 32">
+          <polygon points="23,2 43,16 23,30 3,16" fill="#FFF9EC" stroke="#E17055" stroke-width="1.5"/>
+          <text x="23" y="20" text-anchor="middle" font-size="9" fill="#c0392b" font-family="sans-serif" font-weight="700">조건?</text>
+        </svg>
+        <div class="sym-info">
+          <div class="sym-name">마름모</div>
+          <div class="sym-desc">예 / 아니오 판단</div>
+        </div>
+      </div>
+      <div class="sym-card">
+        <svg class="sym-svg" width="28" height="32" viewBox="0 0 28 32">
+          <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#6c6c8a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <line x1="14" y1="3" x2="14" y2="28" stroke="#6c6c8a" stroke-width="1.5" marker-end="url(#arr)"/>
+        </svg>
+        <div class="sym-info">
+          <div class="sym-name">화살표</div>
+          <div class="sym-desc">흐름의 방향 연결</div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box">
+      팁 — 조건(마름모)에서는 반드시 <strong>예</strong>와 <strong>아니오</strong> 두 방향을 모두 그려야 해요!
+    </div>
+  </div>
+</div>
+
+<!-- 섹션 2: 미션 A -->
+<div class="section-card" id="sec2">
+  <div class="section-header" onclick="toggleSection(2)">
+    <div class="section-num" id="num2">03</div>
+    <div class="section-title-text">미션 A — 버튼 반응 프로그램</div>
+    <div class="section-chevron" id="chev2">▾</div>
+  </div>
+  <div class="section-body" id="body2">
+    <div class="mission-card">
+      <div class="mission-header mh-a"><span class="mission-badge">기본</span> 미션 설명</div>
+      <div class="mission-scenario">
+        마이크로비트의 <strong>버튼 A</strong>를 누르면 하트 💛를 보여주고,
+        <strong>버튼 B</strong>를 누르면 슬픈 표정을 보여주는 프로그램의 순서도를 그려보세요.
+      </div>
+      <div class="mission-hint">힌트: 시작 → 버튼 확인(조건 마름모) → 아이콘 출력(직사각형) → 반복</div>
+    </div>
+
+    <div class="canvas-wrap" id="cwA">
+      <div class="canvas-toolbar">
+        <button class="tool-btn selected" id="toolA-pen" onclick="setTool('A','pen')">✏️ 펜</button>
+        <button class="tool-btn" id="toolA-erase" onclick="setTool('A','erase')">지우개</button>
+        <div class="sep"></div>
+        <div class="color-dot selected" style="background:#1a1a2e" id="colorA-0" onclick="setColor('A','#1a1a2e',0)"></div>
+        <div class="color-dot" style="background:#6C5CE7" id="colorA-1" onclick="setColor('A','#6C5CE7',1)"></div>
+        <div class="color-dot" style="background:#00B894" id="colorA-2" onclick="setColor('A','#00B894',2)"></div>
+        <div class="color-dot" style="background:#E17055" id="colorA-3" onclick="setColor('A','#E17055',3)"></div>
+        <div class="tool-spacer"></div>
+        <button class="clear-btn" onclick="clearCanvas('A')">전체 지우기</button>
+      </div>
+      <canvas id="canvasA" height="280"></canvas>
+      <div class="canvas-label" id="labelA">여기에 손가락으로<br>순서도를 그려보세요</div>
+    </div>
+  </div>
+</div>
+
+<!-- 섹션 3: 미션 B -->
+<div class="section-card" id="sec3">
+  <div class="section-header" onclick="toggleSection(3)">
+    <div class="section-num" id="num3">04</div>
+    <div class="section-title-text">미션 B — 주사위 프로그램</div>
+    <div class="section-chevron" id="chev3">▾</div>
+  </div>
+  <div class="section-body" id="body3">
+    <div class="mission-card">
+      <div class="mission-header mh-b"><span class="mission-badge mission-badge-b">심화</span> 미션 설명</div>
+      <div class="mission-scenario">
+        마이크로비트를 <strong>흔들면</strong> 1~6 사이의 숫자가 랜덤으로 나오는
+        주사위 프로그램의 순서도를 그려보세요.
+      </div>
+      <div class="mission-hint">힌트: 시작 → 흔들기 감지 → 랜덤 숫자 생성 → LED에 숫자 출력 → 반복</div>
+    </div>
+
+    <div class="canvas-wrap" id="cwB">
+      <div class="canvas-toolbar">
+        <button class="tool-btn selected" id="toolB-pen" onclick="setTool('B','pen')">✏️ 펜</button>
+        <button class="tool-btn" id="toolB-erase" onclick="setTool('B','erase')">지우개</button>
+        <div class="sep"></div>
+        <div class="color-dot selected" style="background:#1a1a2e" id="colorB-0" onclick="setColor('B','#1a1a2e',0)"></div>
+        <div class="color-dot" style="background:#6C5CE7" id="colorB-1" onclick="setColor('B','#6C5CE7',1)"></div>
+        <div class="color-dot" style="background:#00B894" id="colorB-2" onclick="setColor('B','#00B894',2)"></div>
+        <div class="color-dot" style="background:#E17055" id="colorB-3" onclick="setColor('B','#E17055',3)"></div>
+        <div class="tool-spacer"></div>
+        <button class="clear-btn" onclick="clearCanvas('B')">전체 지우기</button>
+      </div>
+      <canvas id="canvasB" height="280"></canvas>
+      <div class="canvas-label" id="labelB">여기에 손가락으로<br>순서도를 그려보세요</div>
+    </div>
+  </div>
+</div>
+
+<!-- 섹션 4: 확인 & 소감 -->
+<div class="section-card" id="sec4">
+  <div class="section-header" onclick="toggleSection(4)">
+    <div class="section-num" id="num4">05</div>
+    <div class="section-title-text">확인 체크 & 소감</div>
+    <div class="section-chevron" id="chev4">▾</div>
+  </div>
+  <div class="section-body" id="body4">
+    <div class="checklist" id="checklist">
+      <div class="check-item" onclick="toggleCheck(0)">
+        <div class="check-box-custom"><span class="check-mark">✓</span></div>
+        <div class="check-text">시작과 끝이 타원으로 그려져 있나요?</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(1)">
+        <div class="check-box-custom"><span class="check-mark">✓</span></div>
+        <div class="check-text">조건(마름모)에서 "예"와 "아니오" 두 방향이 모두 그려져 있나요?</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(2)">
+        <div class="check-box-custom"><span class="check-mark">✓</span></div>
+        <div class="check-text">모든 도형이 화살표로 연결되어 있나요?</div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(3)">
+        <div class="check-box-custom"><span class="check-mark">✓</span></div>
+        <div class="check-text">순서도만 보고 친구가 코딩할 수 있을 만큼 자세한가요?</div>
+      </div>
+    </div>
+
+    <textarea class="reflect-textarea" id="reflect" placeholder="순서도를 먼저 그린 다음 MakeCode로 코딩하니까 어떤 점이 달랐나요? 자유롭게 써보세요!"></textarea>
+
+    <div class="star-row">
+      <span class="star-label-text">오늘 난이도</span>
+      <button class="star-btn" onclick="rateStar(1)">★</button>
+      <button class="star-btn" onclick="rateStar(2)">★</button>
+      <button class="star-btn" onclick="rateStar(3)">★</button>
+      <button class="star-btn" onclick="rateStar(4)">★</button>
+      <button class="star-btn" onclick="rateStar(5)">★</button>
+      <span class="star-level" id="star-level"></span>
+    </div>
+
+    <button class="done-btn" onclick="finish()">활동 완료!</button>
+  </div>
+</div>
+
+<!-- 완료 화면 -->
+<div class="complete-screen" id="complete">
+  <div class="complete-icon">🎉</div>
+  <div class="complete-title">수고했어요, <span class="complete-name" id="done-name"></span>!</div>
+  <div class="complete-sub">순서도를 다 그렸어요.<br>이제 MakeCode에서 코딩해볼 차례예요!<br><br>
+    <a href="https://makecode.microbit.org" target="_blank" style="color:var(--purple);font-weight:700">👉 MakeCode 열기</a>
+  </div>
+  <button class="restart-btn" onclick="restart()">처음으로 돌아가기</button>
+</div>
+
+<script>
+// ── 섹션 토글 ──
+const TOTAL = 5;
+let openSection = 0;
+
+function toggleSection(i) {
+  const body = document.getElementById('body' + i);
+  const chev = document.getElementById('chev' + i);
+  const card = document.getElementById('sec' + i);
+  const isOpen = body.classList.contains('open');
+  // 열기
+  body.classList.toggle('open', !isOpen);
+  chev.classList.toggle('open', !isOpen);
+  card.classList.toggle('active-section', !isOpen);
+  if (!isOpen) openSection = i;
+  updateProgress();
+}
+
+// ── 진행 바 ──
+function updateProgress() {
+  const filled = [
+    document.getElementById('inp-name').value.trim().length > 0,
+    true, // 기호: 항상 읽음 처리
+    canvasDrawn.A,
+    canvasDrawn.B,
+    checksDone()
+  ];
+  for (let i = 0; i < TOTAL; i++) {
+    const seg = document.getElementById('prog' + i);
+    seg.className = 'progress-seg' + (filled[i] ? ' done' : (i === openSection ? ' active' : ''));
+  }
+}
+
+function checksDone() {
+  const items = document.querySelectorAll('#checklist .check-item');
+  let n = 0; items.forEach(it => { if (it.classList.contains('checked')) n++; });
+  return n >= 4;
+}
+
+// ── 체크리스트 ──
+function toggleCheck(i) {
+  const items = document.querySelectorAll('#checklist .check-item');
+  items[i].classList.toggle('checked');
+  updateProgress();
+}
+
+// ── 별점 ──
+const starLevels = ['','쉬웠어요','조금 쉬워요','딱 적당해요','조금 어려웠어요','어려웠어요'];
+let starRating = 0;
+function rateStar(n) {
+  starRating = n;
+  document.querySelectorAll('.star-btn').forEach((btn, i) => {
+    btn.classList.toggle('lit', i < n);
+  });
+  document.getElementById('star-level').textContent = starLevels[n];
+}
+
+// ── 캔버스 드로잉 ──
+const canvases = {};
+const ctxs = {};
+const tools = { A: 'pen', B: 'pen' };
+const colors = { A: '#1a1a2e', B: '#1a1a2e' };
+const canvasDrawn = { A: false, B: false };
+
+function initCanvas(id) {
+  const canvas = document.getElementById('canvas' + id);
+  const wrap = document.getElementById('cw' + id);
+  canvas.width = wrap.clientWidth || 340;
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = colors[id];
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  canvases[id] = canvas;
+  ctxs[id] = ctx;
+
+  let drawing = false;
+  let lastX = 0, lastY = 0;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    if (e.touches) {
+      return [(e.touches[0].clientX - rect.left) * scaleX, (e.touches[0].clientY - rect.top) * scaleY];
+    }
+    return [(e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY];
+  }
+
+  function start(e) {
+    e.preventDefault();
+    drawing = true;
+    [lastX, lastY] = getPos(e);
+  }
+  function move(e) {
+    e.preventDefault();
+    if (!drawing) return;
+    const [x, y] = getPos(e);
+    const c = ctxs[id];
+    c.strokeStyle = colors[id];
+    c.lineWidth = tools[id] === 'erase' ? 18 : 2.5;
+    c.globalCompositeOperation = tools[id] === 'erase' ? 'destination-out' : 'source-over';
+    c.beginPath();
+    c.moveTo(lastX, lastY);
+    c.lineTo(x, y);
+    c.stroke();
+    [lastX, lastY] = [x, y];
+    canvasDrawn[id] = true;
+    document.getElementById('label' + id).style.opacity = '0';
+    updateProgress();
+  }
+  function end(e) { e.preventDefault(); drawing = false; }
+
+  canvas.addEventListener('touchstart', start, { passive: false });
+  canvas.addEventListener('touchmove', move, { passive: false });
+  canvas.addEventListener('touchend', end, { passive: false });
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('mouseup', end);
+  canvas.addEventListener('mouseleave', end);
+}
+
+function setTool(id, tool) {
+  tools[id] = tool;
+  document.getElementById('tool' + id + '-pen').classList.toggle('selected', tool === 'pen');
+  document.getElementById('tool' + id + '-erase').classList.toggle('selected', tool === 'erase');
+}
+
+function setColor(id, color, idx) {
+  colors[id] = color;
+  for (let i = 0; i < 4; i++) {
+    const el = document.getElementById('color' + id + '-' + i);
+    if (el) el.classList.toggle('selected', i === idx);
+  }
+  if (tools[id] === 'erase') setTool(id, 'pen');
+}
+
+function clearCanvas(id) {
+  const c = ctxs[id];
+  c.globalCompositeOperation = 'source-over';
+  c.clearRect(0, 0, canvases[id].width, canvases[id].height);
+  canvasDrawn[id] = false;
+  document.getElementById('label' + id).style.opacity = '1';
+  updateProgress();
+}
+
+// ── 완료 ──
+function finish() {
+  const name = document.getElementById('inp-name').value.trim() || '학생';
+  document.getElementById('done-name').textContent = name;
+  document.querySelectorAll('.section-card').forEach(c => c.style.display = 'none');
+  document.getElementById('complete').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restart() {
+  document.querySelectorAll('.section-card').forEach(c => c.style.display = '');
+  document.getElementById('complete').classList.remove('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── 초기화 ──
+window.addEventListener('load', () => {
+  initCanvas('A');
+  initCanvas('B');
+  updateProgress();
+});
+window.addEventListener('resize', () => {
+  ['A', 'B'].forEach(id => {
+    const canvas = canvases[id];
+    if (!canvas) return;
+    const wrap = document.getElementById('cw' + id);
+    const imageData = ctxs[id].getImageData(0, 0, canvas.width, canvas.height);
+    canvas.width = wrap.clientWidth;
+    ctxs[id].putImageData(imageData, 0, 0);
+  });
+});
+</script>
+</body>
+</html>
